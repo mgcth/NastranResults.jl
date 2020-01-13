@@ -40,7 +40,7 @@ julia> mat = nl.readop4("filename.op4", "KAA");
 # load all matrices in a vector of tuples (name, matrix))
 julia> mat = nl.readop4("filename.op4", "ALL");
 
-# read puncfile
+# read punchfile
 julia> mat = nl.readpunch("filename.pch");
 ```
 

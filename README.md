@@ -17,7 +17,7 @@ julia> ] add https://github.com/mgcth/SDNastran.git
 Support for input and output data loading.
 
 ### Input
-A full model loader, as implemented by [drewkett/Nastran.jl](https://github.com/drewkett/Nastran.jl]) can be used.
+A full model loader, as implemented by [drewkett/Nastran.jl](https://github.com/drewkett/Nastran.jl) can be used.
 
 ### Output
 Currently only an op4 (OUTPUT4) loader is implemented supporting real double precision binary sparse non-BIGMAT and BIGMAT matrices and a SOL103 punch reader.

@@ -1,0 +1,8 @@
+name = "SDNastran"
+uuid = "f0544368-8851-11e8-2ba8-cd91cfc3fde2"
+authors = ["Mladen Gibanica <mgcth@users.noreply.github.com>"]
+version = "0.1.0"
+
+[deps]
+FortranFiles = "c58ffaec-ab22-586d-bfc5-781a99fd0b10"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"

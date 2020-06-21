@@ -10,7 +10,7 @@ A Nastran file loader for Julia with support for op4 output data loading.
 To install, write in the Julia REPL
 
 ```julia
-julia> ] add https://github.com/mgcth/SDNastran.git
+julia> ] add https://github.com/mgcth/SDNastran.jl.git
 ```
 
 ## Documentation

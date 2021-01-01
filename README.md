@@ -1,6 +1,6 @@
 # SDNastran
 
-A Julia MSC Nastran OP4, PCH and HDF5 results output loader.
+Load MSC Nastran OP4, PCH and HDF5 results into Julia.
 
 ## Installation
 To install, write in the Julia REPL
@@ -14,9 +14,9 @@ julia> add https://github.com/mgcth/SDNastran.jl.git
 Support for output data loading, only. Currently supports:
 * OP4 (OUTPUT4):
     * Supports real double precision binary sparse non-BIGMAT and BIGMAT matrices
-* PCH:
+* PCH (PUNCH, SORT2):
     * SOL103, real valued modal data
-    * SOL111/108 complex frequency response data
+    * SOL108/111 complex frequency response data
 
 ### Usage
 Example of usage
@@ -36,9 +36,9 @@ julia> mat = readop4("filename.op4", "KAA");
 julia> mat = readop4("filename.op4", "ALL");
 
 # read SOL103 punchfile
-julia> mat = readpch("filename.pch", PunchModalyData);
+julia> mat = readpch("filename.pch", PunchModalData);
 
-# read SOL111 punchfile
+# read SOL108/111 punchfile
 julia> mat = readpch("filename.pch", PunchFrequencyData);
 ```
 

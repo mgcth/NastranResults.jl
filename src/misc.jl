@@ -19,3 +19,4 @@ const DOUBLEP = 15
 
 const PCHL = 18
 const PCHLL = 73
+const DOLLAR = '\$'

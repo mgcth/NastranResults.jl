@@ -1,5 +1,5 @@
 using Test
-using SDNastran
+using NastranResults
 
 # need to implement this soon
 function unit_test_readop4_nofile()

@@ -1,4 +1,4 @@
-name = "SDNastran"
+name = "NastranResults"
 uuid = "f0544368-8851-11e8-2ba8-cd91cfc3fde2"
 authors = ["Mladen Gibanica <mgcth@users.noreply.github.com>"]
 version = "0.1.0"

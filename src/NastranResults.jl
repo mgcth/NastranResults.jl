@@ -1,4 +1,4 @@
-module SDNastran
+module NastranResults
 
 using SparseArrays
 using FortranFiles

@@ -1,4 +1,4 @@
-# SDNastran
+# NastranResults
 
 Load MSC Nastran OP4, PCH and HDF5 results into Julia.
 
@@ -7,7 +7,7 @@ To install, write in the Julia REPL
 
 ```julia
 julia> ]
-julia> add https://github.com/mgcth/SDNastran.jl.git
+pkg> add https://github.com/mgcth/NastranResults.jl.git
 ```
 
 ## Documentation
@@ -22,7 +22,7 @@ Support for output data loading, only. Currently supports:
 Example of usage
 
 ```julia
-julia> using SDNastran
+julia> using NastranResults
 
 # find matrices in file, output vector of strings
 julia> mnames = readop4("filename.op4");
@@ -46,4 +46,4 @@ julia> mat = readpch("filename.pch", PunchFrequencyData);
 - Add testing
 - Improve performance of op4 loader
 - Read more PCH types 
-- Read HDF5 result
+- Read HDF5 result, have code but needs structuring

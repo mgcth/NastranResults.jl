@@ -4,6 +4,7 @@ authors = ["Mladen Gibanica <mgcth@users.noreply.github.com>"]
 version = "0.1.0"
 
 [deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 FortranFiles = "c58ffaec-ab22-586d-bfc5-781a99fd0b10"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

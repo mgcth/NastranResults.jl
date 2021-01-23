@@ -1,5 +1,5 @@
 push!(LOAD_PATH,"../src/")
 
-using Documenter, SDNastran
+using Documenter, NastranResults
 
-makedocs(sitename="SDNAstran Documents")
+makedocs(sitename="NastranResults")

@@ -1,6 +1,6 @@
-# SDNastran.jl Documentation
+# NastranResults.jl Documentation
 
 ```@autodocs
-Modules = [SDNastran]
+Modules = [NastranResults]
 Order   = [:type, :function]
 ```

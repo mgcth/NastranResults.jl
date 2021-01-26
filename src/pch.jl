@@ -84,11 +84,11 @@ function readpch(file::String, type::Type{PunchModalData})
     data_modal = Vector{type}(undef, 0)
     node = Vector{Int}(undef, 0)
 
-    try
+    #try
         lines = readlines(file)
-    catch e
-        println("Error $e. Can't read file")
-    end
+    #catch e
+    #    println("Error $e. Can't read file")
+    #end
 
     cnew = false
     data = PunchModalData()

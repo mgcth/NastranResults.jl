@@ -141,7 +141,8 @@ function readpch(file::String, type::Type{PunchFrequencyData})
     while next !== nothing
         (line, state) = next
 
-        if length(line) < PCHLL
+        if length(line) < PCHLL || contains(line[1:8], "SET") || line[1:8] == "        "
+            next = iterate(lines, state)
             continue
         end
         line = line[1:PCHLL]

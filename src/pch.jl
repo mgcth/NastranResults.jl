@@ -128,11 +128,11 @@ function readpch(file::String, type::Type{PunchFrequencyData})
     data_frequency = Vector{type}(undef, 0)
     frequency = Vector{Float64}(undef, 0)
 
-    try
+    #try
         lines = readlines(file)
-    catch e
-        println("Error $e. Can't read file")
-    end
+    #catch e
+    #    println("Error $e. Can't read file")
+    #end
 
     cnew = false
     data = PunchFrequencyData()

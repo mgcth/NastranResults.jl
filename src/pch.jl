@@ -141,6 +141,9 @@ function readpch(file::String, type::Type{PunchFrequencyData})
     while next !== nothing
         (line, state) = next
 
+        if length(line) < PCHLL
+            continue
+        end
         line = line[1:PCHLL]
         isdollar = line[1] == DOLLAR
 

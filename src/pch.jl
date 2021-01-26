@@ -306,7 +306,7 @@ Collect all response data into a matrix.
 """
 function collect(data::PFData)
     n, m = length(data.response[1].response), length(data.response)
-    d = Matrix{Float64}(undef, n, m)
+    d = Matrix{Complex}(undef, n, m)
     for i in 1:m
         d[:, i] = data.response[1].response
     end

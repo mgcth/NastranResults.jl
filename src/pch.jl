@@ -1,5 +1,6 @@
 abstract type PunchType end
 
+
 """
     PunchModalData
 
@@ -18,6 +19,7 @@ mutable struct PunchModalData <: PunchType
     PunchModalData() = (x = new(); x.eigenvector = Vector{Float64}(undef, 0); x)
 end
 
+
 """
     PunchFrequencyData
 
@@ -35,6 +37,7 @@ mutable struct PunchFrequencyData <: PunchType
     PunchFrequencyData() = (x = new(); x.response = Vector{Complex{Float64}}(undef, 0); x)
 end
 
+
 """
     PMData
 
@@ -44,6 +47,7 @@ struct PMData
     modal::Vector{PunchModalData}
     node::Vector{Int}
 end
+
 
 """
     PData
@@ -61,6 +65,7 @@ end
 Punch data union holding all other punch data types.
 """
 PunchData = Union{PunchModalData, PunchFrequencyData}
+
 
 """
     readpch(file::String, type::PunchData)
@@ -114,6 +119,7 @@ function readpch(file::String, type::Type{PunchModalData})
     return PMData(data_modal, node)
 end
 
+
 """
     readpch(file::String, ::Type{PunchFrequencyData})
 
@@ -141,6 +147,7 @@ function readpch(file::String, type::Type{PunchFrequencyData})
     while next !== nothing
         (line, state) = next
 
+        # can this be more general?
         if length(line) < PCHLL || contains(line[1:8], "SET") || line[1:8] == "        "
             next = iterate(lines, state)
             continue
@@ -167,6 +174,7 @@ function readpch(file::String, type::Type{PunchFrequencyData})
 
     return PFData(data_frequency, frequency)
 end
+
 
 """
     readmeta!(data::PunchModalData, line)
@@ -201,6 +209,7 @@ function readmeta!(data::PunchModalData, line)
     return nothing
 end
 
+
 """
     reameta!(data::PunchFrequencyData, frequency, line, lines, state)
 
@@ -233,6 +242,7 @@ function readmeta!(data::PunchFrequencyData, line)
     return nothing
 end
 
+
 """
     readcomponents!(data::PunchModalData, node, line)
 
@@ -248,6 +258,7 @@ function readcomponents!(data::PunchModalData, node, line)
 
     return nothing
 end
+
 
 """
     readcomponents!(data::PunchFrequencyData, frequency, line, lines, state)
@@ -288,6 +299,7 @@ function readcomponents!(data::PunchFrequencyData, frequency, line, lines, state
     return state
 end
 
+
 """
     collect(data::PMData)
 
@@ -302,6 +314,7 @@ function collect(data::PMData)
 
     return d
 end
+
 
 """
     collect(data::PFData)

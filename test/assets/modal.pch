@@ -1,0 +1,9 @@
+$TITLE   = EIGENMODES                                                          1
+$SUBTITLE= SUBTITLE                                                            2
+$LABEL   =EIGENMODES ANALYSIS                                                  3
+$EIGENVECTOR                                                                   4
+$REAL OUTPUT                                                                   5
+$SUBCASE ID =           1                                                      6
+$EIGENVALUE =  1.0000000E+00  MODE =     1                                     7
+  00000001       G      1.000000E+00      2.000000E+00      3.000000E+00       1
+-CONT-                 -4.000000E+00      5.000000E+00      6.000000E+00       2

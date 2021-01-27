@@ -1,0 +1,11 @@
+$TITLE   = TITLE                                                               1
+$SUBTITLE= 1 X                                                                 2
+$LABEL   = 1 X                                                                 3
+$DISPLACEMENTS                                                                 4
+$REAL-IMAGINARY OUTPUT                                                         5
+$SUBCASE ID =           2                                                      6
+$POINT ID =           1  IDENTIFIED BY FREQUENCY                               7
+    0.000000E+00 G     -1.000000E+00      2.000000E+00      3.000000E+00       1
+-CONT-                 -4.000000E+00      5.000000E+00      6.000000E+00       2
+-CONT-                 -7.000000E+00      8.000000E+00      9.000000E+00       3
+-CONT-                 -1.000000E+01      1.100000E+01      1.200000E+01       4

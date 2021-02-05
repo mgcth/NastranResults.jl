@@ -187,12 +187,12 @@ function unit_test_readpch_readcomponents_frequency(T = Float64)
     readcomponents!(data, frequency, line, lines, state)
     
     @test frequency[1] == 0.0
-    @test data.response[1].x == -1 - 7im
-    @test data.response[1].y ==  2 + 8im
-    @test data.response[1].z ==  3 + 9im
-    @test data.response[1].rx == -4 - 10im
-    @test data.response[1].ry ==  5 + 11im
-    @test data.response[1].rz ==  6 + 12im
+    @test data.response[1].x == -1.0 - 7.0im
+    @test data.response[1].y == 2.0 + 8.0im
+    @test data.response[1].z == 3.0 + 9.0im
+    @test data.response[1].rx == -4.0 - 10.0im
+    @test data.response[1].ry == 5.0 + 11.0im
+    @test data.response[1].rz == 6.0 + 12.0im
 end
 
 
@@ -211,12 +211,12 @@ function integration_test_readpch_modal(T = Float64)
     @test data.modal[1].subcaseid == 1
     @test data.modal[1].eigenvalue == 1.0
     @test data.modal[1].mode ==  1
-    @test data.modal[1].eigenvector[1].x ==  1.0
-    @test data.modal[1].eigenvector[1].y ==  2.0
-    @test data.modal[1].eigenvector[1].z ==  3.0
-    @test data.modal[1].eigenvector[1].rx ==  -4.0
-    @test data.modal[1].eigenvector[1].ry ==  5.0
-    @test data.modal[1].eigenvector[1].rz ==  6.0
+    @test data.modal[1].eigenvector[1].x == 1.0
+    @test data.modal[1].eigenvector[1].y == 2.0
+    @test data.modal[1].eigenvector[1].z == 3.0
+    @test data.modal[1].eigenvector[1].rx == -4.0
+    @test data.modal[1].eigenvector[1].ry == 5.0
+    @test data.modal[1].eigenvector[1].rz == 6.0
 end
 
 
@@ -234,12 +234,12 @@ function integration_test_readpch_frequency(T = Float64)
     @test data.response[1].outputtype == "REAL-IMAGINARY OUTPUT"
     @test data.response[1].subcaseid == 2
     @test data.response[1].point ==  1
-    @test data.response[1].response[1].x ==  -1-7im
-    @test data.response[1].response[1].y ==  2+8im
-    @test data.response[1].response[1].z ==  3+9im
-    @test data.response[1].response[1].rx == -4-10im
-    @test data.response[1].response[1].ry == 5+11im
-    @test data.response[1].response[1].rz == 6+12im
+    @test data.response[1].response[1].x == -1.0 - 7.0im
+    @test data.response[1].response[1].y == 2.0 + 8.0im
+    @test data.response[1].response[1].z == 3.0 + 9.0im
+    @test data.response[1].response[1].rx == -4.0 - 10.0im
+    @test data.response[1].response[1].ry == 5.0 + 11.0im
+    @test data.response[1].response[1].rz == 6.0 + 12.0im
 end
 
 

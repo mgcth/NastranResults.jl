@@ -23,3 +23,5 @@ const PCHLL = 73
 const DOLLAR = '\$'
 const CONT = "-CONT-"
 const EQUAL = '='
+
+const DOF = 6

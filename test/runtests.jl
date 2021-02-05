@@ -8,7 +8,8 @@ import NastranResults.readmeta!,
        NastranResults.PunchModalData,
        NastranResults.PMData,
        NastranResults.PunchFrequencyData,
-       NastranResults.PFData
+       NastranResults.PFData,
+       NastranResults.Component
 
 
 # need to implement this soon
@@ -82,13 +83,14 @@ function unit_test_readpch_constants()
     @test NastranResults.DOLLAR == '\$'
     @test NastranResults.CONT == "-CONT-"
     @test NastranResults.EQUAL == '='
+    @test NastranResults.DOF == 6
 end
 
 
 """
     test function readmeta! for modal type
 """
-function unit_test_readpch_readmeta_modal()
+function unit_test_readpch_readmeta_modal(T = Float64)
     lines = []
     push!(lines, "\$TITLE   = EIGENMODES                                                          1")
     push!(lines, "\$SUBTITLE= SUBTITLE                                                            2")
@@ -98,7 +100,7 @@ function unit_test_readpch_readmeta_modal()
     push!(lines, "\$SUBCASE ID =           1                                                      6")
     push!(lines, "\$EIGENVALUE =  1.0000000E+00  MODE =     1                                     7")
 
-    data = PunchModalData()
+    data = PunchModalData{T}()
     for line in lines
         line = line[1:PCHLL]
         readmeta!(data, line)
@@ -118,7 +120,7 @@ end
 """
     test function reameta! for frequency type
 """
-function unit_test_readpch_readmeta_frequency()
+function unit_test_readpch_readmeta_frequency(T = Float64)
     lines = []
     push!(lines, "\$TITLE   = TITLE                                                               1")
     push!(lines, "\$SUBTITLE= 1 X                                                                 2")
@@ -128,7 +130,7 @@ function unit_test_readpch_readmeta_frequency()
     push!(lines, "\$SUBCASE ID =           2                                                      6")
     push!(lines, "\$POINT ID =           1  IDENTIFIED BY FREQUENCY                               7")
     
-    data = PunchFrequencyData()
+    data = PunchFrequencyData{T}()
     for line in lines
         line = line[1:PCHLL]
         readmeta!(data, line)
@@ -147,56 +149,58 @@ end
 """
     test function readcomponents! for modal type
 """
-function unit_test_readpch_readcomponents_modal()
+function unit_test_readpch_readcomponents_modal(T = Float64)
     l1 = "  00000001       G      1.000000E+00      2.000000E+00      3.000000E+00       1"
     l2 = "-CONT-                 -4.000000E+00      5.000000E+00      6.000000E+00       2"
+    lines = [l1, l2]
 
-    data = PunchModalData()
+    data = PunchModalData{T}()
     node = Vector{Int}(undef, 0)
-    readcomponents!(data, node, l1)
-    readcomponents!(data, node, l2)
+    next = iterate(lines)
+    (line, state) = next
+    readcomponents!(data, node, line, lines, state)
 
     @test node[1] == 1
-    @test data.eigenvector[1] ==  1.0
-    @test data.eigenvector[2] ==  2.0
-    @test data.eigenvector[3] ==  3.0
-    @test data.eigenvector[4] == -4.0
-    @test data.eigenvector[5] ==  5.0
-    @test data.eigenvector[6] ==  6.0
+    @test data.eigenvector[1].x ==  1.0
+    @test data.eigenvector[1].y ==  2.0
+    @test data.eigenvector[1].z ==  3.0
+    @test data.eigenvector[1].rx == -4.0
+    @test data.eigenvector[1].ry ==  5.0
+    @test data.eigenvector[1].rz ==  6.0
 end
 
 
 """
     test function readcomponents! for frequency type
 """
-function unit_test_readpch_readcomponents_frequency()
+function unit_test_readpch_readcomponents_frequency(T = Float64)
     l1 = "    0.000000E+00 G     -1.000000E+00      2.000000E+00      3.000000E+00       1"
     l2 = "-CONT-                 -4.000000E+00      5.000000E+00      6.000000E+00       2"
     l3 = "-CONT-                 -7.000000E+00      8.000000E+00      9.000000E+00       3"
     l4 = "-CONT-                 -1.000000E+01      1.100000E+01      1.200000E+01       4"
     lines = [l1, l2, l3, l4]
     
-    data = PunchFrequencyData()
-    frequency = Vector{Float64}(undef, 0)
+    data = PunchFrequencyData{T}()
+    frequency = Vector{T}(undef, 0)
     next = iterate(lines)
     (line, state) = next
     readcomponents!(data, frequency, line, lines, state)
     
     @test frequency[1] == 0.0
-    @test data.response[1] == -1 - 7im
-    @test data.response[2] ==  2 + 8im
-    @test data.response[3] ==  3 + 9im
-    @test data.response[4] == -4 - 10im
-    @test data.response[5] ==  5 + 11im
-    @test data.response[6] ==  6 + 12im
+    @test data.response[1].x == -1 - 7im
+    @test data.response[1].y ==  2 + 8im
+    @test data.response[1].z ==  3 + 9im
+    @test data.response[1].rx == -4 - 10im
+    @test data.response[1].ry ==  5 + 11im
+    @test data.response[1].rz ==  6 + 12im
 end
 
 
 """
     test function readpch! for frequency type
 """
-function integration_test_readpch_modal()
-    data = readpch("$(@__DIR__)/assets/modal.pch", PunchModalData)
+function integration_test_readpch_modal(T = Float64)
+    data = readpch("$(@__DIR__)/assets/modal.pch", PunchModalData{T})
 
     @test data.node == [1]
     @test data.modal[1].title == "EIGENMODES"
@@ -207,15 +211,20 @@ function integration_test_readpch_modal()
     @test data.modal[1].subcaseid == 1
     @test data.modal[1].eigenvalue == 1.0
     @test data.modal[1].mode ==  1
-    @test data.modal[1].eigenvector ==  [1, 2, 3, -4, 5, 6]
+    @test data.modal[1].eigenvector[1].x ==  1.0
+    @test data.modal[1].eigenvector[1].y ==  2.0
+    @test data.modal[1].eigenvector[1].z ==  3.0
+    @test data.modal[1].eigenvector[1].rx ==  -4.0
+    @test data.modal[1].eigenvector[1].ry ==  5.0
+    @test data.modal[1].eigenvector[1].rz ==  6.0
 end
 
 
 """
     test function readpch! for frequency type
 """
-function integration_test_readpch_frequency()
-    data = readpch("$(@__DIR__)/assets/frequency.pch", PunchFrequencyData)
+function integration_test_readpch_frequency(T = Float64)
+    data = readpch("$(@__DIR__)/assets/frequency.pch", PunchFrequencyData{T})
 
     @test data.frequency == [0.0]
     @test data.response[1].title == "TITLE"
@@ -225,25 +234,47 @@ function integration_test_readpch_frequency()
     @test data.response[1].outputtype == "REAL-IMAGINARY OUTPUT"
     @test data.response[1].subcaseid == 2
     @test data.response[1].point ==  1
-    @test data.response[1].response ==  [-1-7im, 2+8im, 3+9im, -4-10im, 5+11im, 6+12im]
+    @test data.response[1].response[1].x ==  -1-7im
+    @test data.response[1].response[1].y ==  2+8im
+    @test data.response[1].response[1].z ==  3+9im
+    @test data.response[1].response[1].rx == -4-10im
+    @test data.response[1].response[1].ry == 5+11im
+    @test data.response[1].response[1].rz == 6+12im
 end
 
 
 """
     test function collect for modal type
 """
-function unit_test_collect_modal()
-    data = Vector{PunchModalData}(undef, 0)
+function unit_test_collect_component(T = Float64)
+    d = []
+    n = 3
+    testvector = randn(6, n) 
+    for i = 1:n
+        push!(d, collect(Component{T}(testvector[:, i]...)))
+    end
+
+    for i in 1:n
+        @test d[i] == testvector[:, i]
+    end
+end
+
+
+"""
+    test function collect for modal type
+"""
+function unit_test_collect_modal(T = Float64)
+    data = Vector{PunchModalData{T}}(undef, 0)
     node = Vector{Int}(undef, 0)
     n = 3
-    testvector = randn(5, n) 
+    testvector = randn(6, n) 
     for i = 1:n
-        mdata = PunchModalData()
-        mdata.eigenvector = testvector[:, i]
+        mdata = PunchModalData{T}()
+        push!(mdata.eigenvector, Component{T}(testvector[:, i]...))
         push!(node, i)
         push!(data, mdata)
     end
-    testdata = PMData(data, node)
+    testdata = PMData{T}(data, node)
     d = collect(testdata)
 
     for i in 1:n
@@ -255,18 +286,18 @@ end
 """
     test function collect for frequency type
 """
-function unit_test_collect_frequency()
-    data = Vector{PunchFrequencyData}(undef, 0)
+function unit_test_collect_frequency(T = Float64)
+    data = Vector{PunchFrequencyData{T}}(undef, 0)
     node = Vector{Int}(undef, 0)
     n = 3
-    testvector = randn(5, n) + randn(5, n)*im
+    testvector = randn(6, n) + randn(6, n)*im
     for i = 1:n
-        mdata = PunchFrequencyData()
-        mdata.response = testvector[:, i]
+        mdata = PunchFrequencyData{T}()
+        push!(mdata.response, Component{Complex{T}}(testvector[:, i]...))
         push!(node, i)
         push!(data, mdata)
     end
-    testdata = PFData(data, node)
+    testdata = PFData{T}(data, node)
     d = collect(testdata)
 
     for i in 1:n
@@ -298,6 +329,7 @@ end
     unit_test_readpch_readcomponents_modal()
     unit_test_readpch_readcomponents_frequency()
 
+    unit_test_collect_component()
     unit_test_collect_modal()
     unit_test_collect_frequency()
 

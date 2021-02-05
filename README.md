@@ -15,8 +15,8 @@ Support for output data loading, only. Currently supports:
 * OP4 (OUTPUT4):
     * Supports real double precision binary sparse non-BIGMAT and BIGMAT matrices
 * PCH (PUNCH, SORT2):
-    * SOL103, real valued modal data
-    * SOL108/111 complex frequency response data
+    * SOL103, real valued modal data, single precision
+    * SOL108/111 complex frequency response data, single precision
 
 ### Usage
 Example of usage

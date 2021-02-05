@@ -1,3 +1,13 @@
+struct Component{T <: Number}
+    x::T
+    y::T
+    z::T
+    rx::T
+    ry::T
+    rz::T
+end
+
+
 abstract type PunchType end
 
 
@@ -6,17 +16,17 @@ abstract type PunchType end
 
 Nastran punch file modal data format.
 """
-mutable struct PunchModalData <: PunchType
+mutable struct PunchModalData{T <: Real} <: PunchType
     title::String
     subtitle::String
     label::String
     datatype::String
     outputtype::String
-    subcaseid::Int64
+    subcaseid::Int
     eigenvalue::Float64
-    mode::Int64
-    eigenvector::Vector{Float64}
-    PunchModalData() = (x = new(); x.eigenvector = Vector{Float64}(undef, 0); x)
+    mode::Int
+    eigenvector::Vector{Component{T}} # only support for real modes so far
+    PunchModalData{T}() where T = (x = new(); x.eigenvector = Vector{Component{T}}(undef, 0); x)
 end
 
 
@@ -25,16 +35,16 @@ end
 
 Nastran punch file modal data format.
 """
-mutable struct PunchFrequencyData <: PunchType
+mutable struct PunchFrequencyData{T <: Real} <: PunchType
     title::String
     subtitle::String
     label::String
     datatype::String
     outputtype::String
-    subcaseid::Int64
-    point::Int64
-    response::Vector{Complex{Float64}}
-    PunchFrequencyData() = (x = new(); x.response = Vector{Complex{Float64}}(undef, 0); x)
+    subcaseid::Int
+    point::Int
+    response::Vector{Component{Complex{T}}}
+    PunchFrequencyData{T}() where T = (x = new(); x.response = Vector{Component{T}}(undef, 0); x)
 end
 
 
@@ -43,8 +53,8 @@ end
 
 Nastran punch file modal data load format.
 """
-struct PMData
-    modal::Vector{PunchModalData}
+struct PMData{T <: Real}
+    modal::Vector{PunchModalData{T}}
     node::Vector{Int}
 end
 
@@ -54,9 +64,9 @@ end
 
 Nastran punch file response data load format.
 """
-struct PFData
-    response::Vector{PunchFrequencyData}
-    frequency::Vector{Float64}
+struct PFData{T <: Real}
+    response::Vector{PunchFrequencyData{T}}
+    frequency::Vector{T}
 end
 
 """
@@ -64,7 +74,7 @@ end
 
 Punch data union holding all other punch data types.
 """
-PunchData = Union{PunchModalData, PunchFrequencyData}
+PunchData{T} = Union{PunchModalData{T}, PunchFrequencyData{T}}
 
 
 """
@@ -72,7 +82,7 @@ PunchData = Union{PunchModalData, PunchFrequencyData}
 
 Read punch file.
 """
-readpch(file::String, type::PunchData)
+readpch(file::String, type::PunchData{T}) where T <: Real
 
 
 """
@@ -85,7 +95,7 @@ This should be avoided, in favour of HDF5, but is included for existing result f
 # Reference
 MSC Nastran 2017.1 Reference Manual
 """
-function readpch(file::String, type::Type{PunchModalData})
+function readpch(file::String, type::Type{PunchModalData{T}}) where T <: Real
     data_modal = Vector{type}(undef, 0)
     node = Vector{Int}(undef, 0)
 
@@ -96,23 +106,29 @@ function readpch(file::String, type::Type{PunchModalData})
     #end
 
     cnew = false
-    data = PunchModalData()
-    for line in lines
+    data = PunchModalData{T}()
+
+    next = iterate(lines)
+    while next !== nothing
+        (line, state) = next
+
         line = line[1:PCHLL]
         isdollar = line[1] == DOLLAR
 
         if isdollar && cnew
             push!(data_modal, data)
-            data = PunchModalData()
+            data = PunchModalData{T}()
             cnew = false
         end
 
         if isdollar
             readmeta!(data, line)
         else
-            readcomponents!(data, node, line)
+            state = readcomponents!(data, node, line, lines, state)
             cnew = true
         end
+
+        next = iterate(lines, state)
     end
     push!(data_modal, data)
 
@@ -130,7 +146,7 @@ This should be avoided, in favour of HDF5, but is included for existing result f
 # Reference
 MSC Nastran 2017.1 Reference Manual
 """
-function readpch(file::String, type::Type{PunchFrequencyData})
+function readpch(file::String, type::Type{PunchFrequencyData{T}}) where T <: Real
     data_frequency = Vector{type}(undef, 0)
     frequency = Vector{Float64}(undef, 0)
 
@@ -141,7 +157,7 @@ function readpch(file::String, type::Type{PunchFrequencyData})
     #end
 
     cnew = false
-    data = PunchFrequencyData()
+    data = PunchFrequencyData{T}()
 
     next = iterate(lines)
     while next !== nothing
@@ -157,7 +173,7 @@ function readpch(file::String, type::Type{PunchFrequencyData})
 
         if isdollar && cnew
             push!(data_frequency, data)
-            data = PunchFrequencyData()
+            data = PunchFrequencyData{T}()
             cnew = false
         end
 
@@ -181,7 +197,7 @@ end
 
 Read modal metadata.
 """
-function readmeta!(data::PunchModalData, line)
+function readmeta!(data::PunchModalData{T}, line) where T <: Real
     meta = split(line[2:end], EQUAL)
     meta1 = rstrip(meta[1])
     meta2 = length(meta) == 1 ? rstrip(lstrip(meta[1])) : rstrip(lstrip(meta[2]))
@@ -215,7 +231,7 @@ end
 
 Read frequency metadata.
 """
-function readmeta!(data::PunchFrequencyData, line)
+function readmeta!(data::PunchFrequencyData{T}, line) where T <: Real
     meta = split(line[2:end], EQUAL)
     meta1 = rstrip(meta[1])
     meta2 = length(meta) == 1 ? rstrip(lstrip(meta[1])) : rstrip(lstrip(meta[2]))
@@ -244,19 +260,26 @@ end
 
 
 """
-    readcomponents!(data::PunchModalData, node, line)
+    readcomponents!(data::PunchModalData, node, line, lines, state)
 
 Read modal components.
 """
-function readcomponents!(data::PunchModalData, node, line)
+function readcomponents!(data::PunchModalData{T}, node, line, lines, state) where T <: Real
     c1 = strip(line[1:PCHL - 1]) # skip last character
-    cmp(c1, CONT) == 0 ? nothing : push!(node, parse(Int64, c1))
+    cmp(c1, CONT) == 0 ? nothing : push!(node, parse(Int, c1))
 
-    push!(data.eigenvector, parse(Float64, strip(line[PCHL + 1:2PCHL])))
-    push!(data.eigenvector, parse(Float64, strip(line[2PCHL + 1:3PCHL])))
-    push!(data.eigenvector, parse(Float64, strip(line[3PCHL + 1:4PCHL])))
+    x = parse(T, strip(line[PCHL + 1:2PCHL]))
+    y = parse(T, strip(line[2PCHL + 1:3PCHL]))
+    z = parse(T, strip(line[3PCHL + 1:4PCHL]))
 
-    return nothing
+    (line, state) = iterate(lines, state)
+    rx = parse(T, strip(line[PCHL + 1:2PCHL]))
+    ry = parse(T, strip(line[2PCHL + 1:3PCHL]))
+    rz = parse(T, strip(line[3PCHL + 1:4PCHL]))
+
+    push!(data.eigenvector, Component{T}(x, y, z, rx, ry, rz))
+
+    return state
 end
 
 
@@ -265,36 +288,31 @@ end
 
 Read real/imaginary translation and rotation components.
 """
-function readcomponents!(data::PunchFrequencyData, frequency, line, lines, state)
+function readcomponents!(data::PunchFrequencyData{T}, frequency, line, lines, state) where T <: Real
     # for now I think this is clearest
     c1 = strip(line[1:PCHL - 1]) # skip last character
     cmp(c1, CONT) == 0 ? nothing : push!(frequency, parse(Float64, c1))
 
-    x = parse(Float64, strip(line[PCHL + 1:2PCHL]))
-    y = parse(Float64, strip(line[2PCHL + 1:3PCHL]))
-    z = parse(Float64, strip(line[3PCHL + 1:4PCHL]))
+    x = parse(T, strip(line[PCHL + 1:2PCHL]))
+    y = parse(T, strip(line[2PCHL + 1:3PCHL]))
+    z = parse(T, strip(line[3PCHL + 1:4PCHL]))
 
     (line, state) = iterate(lines, state)
-    rx = parse(Float64, strip(line[PCHL + 1:2PCHL]))
-    ry = parse(Float64, strip(line[2PCHL + 1:3PCHL]))
-    rz = parse(Float64, strip(line[3PCHL + 1:4PCHL]))
+    rx = parse(T, strip(line[PCHL + 1:2PCHL]))
+    ry = parse(T, strip(line[2PCHL + 1:3PCHL]))
+    rz = parse(T, strip(line[3PCHL + 1:4PCHL]))
 
     (line, state) = iterate(lines, state)
-    x = x + im*parse(Float64, strip(line[PCHL + 1:2PCHL]))
-    y = y + im*parse(Float64, strip(line[2PCHL + 1:3PCHL]))
-    z = z + im*parse(Float64, strip(line[3PCHL + 1:4PCHL]))
+    x = x + im*parse(T, strip(line[PCHL + 1:2PCHL]))
+    y = y + im*parse(T, strip(line[2PCHL + 1:3PCHL]))
+    z = z + im*parse(T, strip(line[3PCHL + 1:4PCHL]))
 
     (line, state) = iterate(lines, state)
-    rx = rx + im*parse(Float64, strip(line[PCHL + 1:2PCHL]))
-    ry = ry + im*parse(Float64, strip(line[2PCHL + 1:3PCHL]))
-    rz = rz + im*parse(Float64, strip(line[3PCHL + 1:4PCHL]))
+    rx = rx + im*parse(T, strip(line[PCHL + 1:2PCHL]))
+    ry = ry + im*parse(T, strip(line[2PCHL + 1:3PCHL]))
+    rz = rz + im*parse(T, strip(line[3PCHL + 1:4PCHL]))
 
-    push!(data.response, x)
-    push!(data.response, y)
-    push!(data.response, z)
-    push!(data.response, rx)
-    push!(data.response, ry)
-    push!(data.response, rz)
+    push!(data.response, Component{Complex{T}}(x, y, z, rx, ry, rz))
 
     return state
 end
@@ -303,13 +321,13 @@ end
 """
     collect(data::PMData)
 
-Collect all modal data into a matrix.
+Collect all modal data into a matrix .
 """
-function collect(data::PMData)
+function collect(data::PMData{T}) where T <: Real
     n, m = length(data.modal[1].eigenvector), length(data.modal)
-    d = Matrix{Float64}(undef, n, m)
+    d = Matrix{Float64}(undef, n*DOF, m)
     for i in 1:m
-        d[:, i] = data.modal[i].eigenvector
+        d[:, i] = collect(data.modal[i].eigenvector)
     end
 
     return d
@@ -321,12 +339,30 @@ end
 
 Collect all response data into a matrix.
 """
-function collect(data::PFData)
+function collect(data::PFData{T}) where T <: Real
     n, m = length(data.response[1].response), length(data.response)
-    d = Matrix{Complex}(undef, n, m)
+    d = Matrix{Complex{T}}(undef, n*DOF, m)
     for i in 1:m
-        d[:, i] = data.response[i].response
+        d[:, i] = collect(data.response[i].response)
     end
 
     return d
+end
+
+"""
+    collect(data::Component)
+
+Collect components in x, y, z, rx, ry, and rz order
+"""
+function collect(data::Component{T}) where T <: Number
+    return [data.x, data.y, data.z, data.rx, data.ry, data.rz]
+end
+
+"""
+    collect(data::Vector{Component})
+
+Collect components in x, y, z, rx, ry, and rz order
+"""
+function collect(data::Vector{Component{T}}) where T <: Number
+    return collect(Iterators.flatten([collect(x) for x in data]))
 end

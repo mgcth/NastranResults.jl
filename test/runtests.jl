@@ -202,6 +202,8 @@ end
 function integration_test_readpch_modal(T = Float64)
     data = readpch("$(@__DIR__)/assets/modal.pch", PunchModalData{T})
 
+    @test typeof(first(data.node)) == Int
+    @test typeof(first(data.modal[1].eigenvector).x) == T
     @test data.node == [1]
     @test data.modal[1].title == "EIGENMODES"
     @test data.modal[1].subtitle == "SUBTITLE"
@@ -226,6 +228,8 @@ end
 function integration_test_readpch_frequency(T = Float64)
     data = readpch("$(@__DIR__)/assets/frequency.pch", PunchFrequencyData{T})
 
+    @test typeof(first(data.frequency)) == T
+    @test typeof(first(data.response[1].response).x) == Complex{T}
     @test data.frequency == [0.0]
     @test data.response[1].title == "TITLE"
     @test data.response[1].subtitle == "1 X"

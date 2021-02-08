@@ -148,7 +148,7 @@ MSC Nastran 2017.1 Reference Manual
 """
 function readpch(file::String, type::Type{PunchFrequencyData{T}}) where T <: Real
     data_frequency = Vector{type}(undef, 0)
-    frequency = Vector{Float64}(undef, 0)
+    frequency = Vector{T}(undef, 0)
 
     #try
         lines = readlines(file)

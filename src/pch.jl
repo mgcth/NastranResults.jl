@@ -8,6 +8,12 @@ struct Component{T <: Number}
 end
 
 
+
+"""
+    PunchType
+
+Abstract supertype of PunchModalData and PunchFrequencyData
+"""
 abstract type PunchType end
 
 
@@ -349,6 +355,7 @@ function collect(data::PFData{T}) where T <: Real
     return d
 end
 
+
 """
     collect(data::Component)
 
@@ -357,6 +364,7 @@ Collect components in x, y, z, rx, ry, and rz order
 function collect(data::Component{T}) where T <: Number
     return [data.x, data.y, data.z, data.rx, data.ry, data.rz]
 end
+
 
 """
     collect(data::Vector{Component})

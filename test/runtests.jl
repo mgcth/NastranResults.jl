@@ -79,7 +79,7 @@ function unit_test_readpch_constants()
     @test NastranResults.SINGLEP == 7
     @test NastranResults.DOUBLEP == 15
     @test NastranResults.PCHL == 18
-    @test NastranResults.PCHLL == 73
+    @test NastranResults.PCHLL == 72
     @test NastranResults.DOLLAR == '\$'
     @test NastranResults.CONT == "-CONT-"
     @test NastranResults.EQUAL == '='

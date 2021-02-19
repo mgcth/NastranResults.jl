@@ -19,7 +19,7 @@ const SINGLEP = 7
 const DOUBLEP = 15
 
 const PCHL = 18
-const PCHLL = 73
+const PCHLL = 72
 const DOLLAR = '\$'
 const CONT = "-CONT-"
 const EQUAL = '='

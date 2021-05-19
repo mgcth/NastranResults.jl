@@ -169,14 +169,17 @@ function readpch(file::String, type::Type{PunchFrequencyData{T}}) where T <: Rea
     while next !== nothing
         (line, state) = next
 
-        # can this be more general?
-        if length(line) < PCHLL || contains(line[1:8], "SET") || line[1:8] == "        "
-            next = iterate(lines, state)
-            continue
-        end
-        line = line[1:PCHLL]
+        line = length(line) < PCHLL ? line[:] : line[1:PCHLL]
         isdollar = line[1] == DOLLAR
 
+        # can this be more general?
+        if length(line) > 8
+            if contains(line[1:8], "SET") || line[1:8] == "        "
+                next = iterate(lines, state)
+                continue
+            end
+        end
+        
         if isdollar && cnew
             push!(data_frequency, data)
             data = PunchFrequencyData{T}()
